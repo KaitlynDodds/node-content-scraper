@@ -1,0 +1,22 @@
+{
+  "name": "content-scraper",
+  "version": "1.0.0",
+  "description": "A node.js command line application that goes to an e-commerce site to get the latest prices and save them to a spreadsheet (CSV format)",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KaitlynDodds/node-content-scraper.git"
+  },
+  "author": "kaitlyndodds",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KaitlynDodds/node-content-scraper/issues"
+  },
+  "homepage": "https://github.com/KaitlynDodds/node-content-scraper#readme",
+  "dependencies": {
+    "npm": "^6.1.0"
+  }
+}
