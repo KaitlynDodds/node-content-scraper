@@ -1,15 +1,20 @@
 'use strict'
 
 const Crawler = require('crawler');
+const csv = require('./csv');
 
 function scrape(uri, path = "") {
-
-	// create new crawler 
-	const crawler = new Crawler({
-		rateLimit: 1000,
-		// This will be called for each crawled page
-	    callback : scrapeProductPage
-	});
+	let crawler;
+	try {
+		// create new crawler 
+		crawler = new Crawler({
+			rateLimit: 1000,
+			// This will be called for each crawled page
+		    callback : scrapeProductPage
+		});
+	} catch (err) {
+		console.error(`Unable to connect to site ${uri + '/' + path}:\n ${err.message}`);
+	}
 
 	// make direct hit on known url 
 	crawler.direct({
@@ -17,7 +22,7 @@ function scrape(uri, path = "") {
 	    skipEventRequest: false, // defaults to true, direct requests won't trigger Evnet:'request'
 	    callback: function(err, res) {
 	    	if (err) {
-		        console.log(err)
+		        console.error(`Unable to connect to site ${uri + '/' + path}:\n ${err.message}`);
 		    } else {
 		    	// setup to use jquery
 		        let $ = res.$;
@@ -42,13 +47,12 @@ function scrape(uri, path = "") {
 		    }
 	    }
 	});
-
-	console.log('done');
+	
 }
 
 function scrapeProductPage(err, res, done) {
 	if (err) {
-        console.log(err);
+        console.error(`Unable to scrape site ${uri + '/' + path}:\n ${err.message}`);
     } else {
     	// setup to use jquery
         var $ = res.$;
@@ -57,18 +61,15 @@ function scrapeProductPage(err, res, done) {
         const data = {
         	title: $('.shirt-details h1').contents().not('span').text().trim(), 
         	price: $('.price').text(),
-        	img: `${res.request.uri.host}/${$('.shirt-picture img').attr('src')}`,
+        	imageurl: `${res.request.uri.host}/${$('.shirt-picture img').attr('src')}`,
         	url: res.request.uri.href
         };
 
-        console.log(data);
-
         // build csv
-
+        csv.toCSV(data);
     }
 
     done();
 }
-
 
 module.exports.scrape = scrape;
