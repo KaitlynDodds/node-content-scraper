@@ -1,5 +1,6 @@
 const Json2csvParser = require('json2csv').Parser;
-var fs = require('fs');
+const logger = require('./logger').logger;
+const fs = require('fs');
  
 function toCSV(records) {
 	const fields = Object.keys(records);
@@ -7,12 +8,12 @@ function toCSV(records) {
 
 	// get current date 
 	const date = new Date();
-	const filename = `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`;
+	const filename = `data/${date.getFullYear()}-${date.getMonth()}-${date.getDay()}.csv`;
 
 
 	const opts = {
 		fields: fields,
-		header: (!fs.existsSync(`data/${filename}.csv`)) // returns false if file does not exist, will need headers only when writing to the file for the first time
+		header: (overwriteFile(filename)) // returns false if file does not exist, will need headers only when writing to the file for the first time
 	};
 
 	// add timestamp to csv records 
@@ -24,22 +25,37 @@ function toCSV(records) {
 		const csv = json2csvParser.parse(records);
 
 		// if file already exists, overwrite 
-		
+		if (overwriteFile(filename)) {
+			// write data to csv file 
+			fs.writeFile(filename, `${csv}\n`, function (err) {
+		  		if (err) throw err;
+		  		logger.write('.');
+			});
+		} else {
+			// write data to csv file 
+			fs.appendFile(filename, `${csv}\n`, function (err) {
+		  		if (err) throw err;
+		  		logger.write('.');
+			});
+		}
 
-		// write data to csv file 
-		fs.appendFile(`data/${filename}.csv`, `${csv}\n`, function (err) {
-	  		if (err) throw err;
-	  		console.log('.');
-		});
 	} catch (err) {
-		console.error(`Unable to write to CSV file: ${err.message}`);
+		logger.log(`Unable to write to CSV file: ${err.message}`);
+		logger.log(`Unable to write to CSV file: ${err.message}`);
 	}
 }
 
+// check if last modified date is more than 5 sec old 
 function overwriteFile(filename) {
+	if (fs.existsSync(filename)) {
+		const stats = fs.statSync(filename);
+		const lastModified = new Date(stats.mtime);
+		const now = new Date();
 
-	// check if last modified date is more than 60 sec old 
-
+		return (now.getSeconds() - lastModified.getSeconds() > 2);
+	} else {
+		return true;
+	}
 }
 
 module.exports.toCSV = toCSV;
