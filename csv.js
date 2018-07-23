@@ -8,7 +8,7 @@ function toCSV(records) {
 
 	// get current date 
 	const date = new Date();
-	const filename = `data/${date.getFullYear()}-${date.getMonth()}-${date.getDay()}.csv`;
+	const filename = `data/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.csv`;
 
 
 	const opts = {
